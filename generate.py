@@ -1,13 +1,14 @@
 import datetime as dt
 import time
-import sys, getopt
 import argparse
 
 
 def createHeader(zone):
     datetime = dt.datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
-    mname = "ns1.example.com."
-    rname = "hostmaster.example.com."
+    mname = f"ns1.{zone}."
+    ns_prefix = "ns1"
+    ns_ip = "127.0.0.1"
+    rname = f"hostmaster.{zone}."
     serial = 2021030100
     refresh = 3600
     retry = 600
@@ -16,22 +17,23 @@ def createHeader(zone):
     ttl = 3600
     name = zone
     origin = f"$ORIGIN {zone}."
-    ttl = f"$TTL {ttl}"
+    ttl_full = f"$TTL {ttl}"
     return  f"""; Zone: {zone}
 ; Exported  (yyyy-mm-ddThh:mm:ss.sssZ): {datetime}
 
 {origin}
-{ttl}
+{ttl_full}
 
 ; SOA Record
-{name}\t{ttl}\tIN\tSOA\t{mname} {rname} (
+@\t{ttl}\tIN\tSOA\t{mname} {rname} (
 {serial} ;serial
 {refresh} ;refresh
 {retry} ;retry
 {expire} ;expire
 {minimum} ;minimum ttl
 )
-
+@\tIN\tNS\t{mname}
+{ns_prefix}\tIN\tA\t{ns_ip}
 """
 
 def ipconversion4to6(ipv4_address):
@@ -81,6 +83,7 @@ def main():
     f = open(args.ofile, "w")
     f.write(createHeader(args.zone))
     writeRecords(f, args.startrange, int(args.amount))
+    f.close()
     after = time.process_time()
     total = after - before
     print(f"Time taken to generate zone file: {total}")
