@@ -72,7 +72,7 @@ def main():
                     description='Generate a zone file with AAAA records',
                     epilog='2025 Andreas Levander')
     
-    parser.add_argument('-z', '--zone', help='Zone name', required=True)
+    parser.add_argument('-z', '--zone', help='Zone name', required=False)
     parser.add_argument('-o', '--ofile', help='Output file name', required=True)
     parser.add_argument('-sr', '--startrange', help='Start IP range, inclusive', required=True)
     parser.add_argument('-a', '--amount', help='Amount of records to generate', required=True)
@@ -81,7 +81,8 @@ def main():
 
             
     f = open(args.ofile, "w")
-    f.write(createHeader(args.zone))
+    if args.zone is not None:
+        f.write(createHeader(args.zone))
     writeRecords(f, args.startrange, int(args.amount))
     f.close()
     after = time.process_time()
