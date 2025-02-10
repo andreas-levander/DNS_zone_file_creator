@@ -58,7 +58,7 @@ def writeRecords(f, startIP, amount):
     ip = list(map(int,startIP.split("."))) # [192, 168, 1, 1]
     i = 0
     while i < amount:
-        f.write(f"{".".join(str(x) for x in ip)}\tIN\tAAAA\t{ipconversion4to6(ip)}\n")
+        f.write(f"{'.'.join(str(x) for x in ip)}\tIN\tAAAA\t{ipconversion4to6(ip)}\n")
         incrementIP(ip)
         i += 1
     
