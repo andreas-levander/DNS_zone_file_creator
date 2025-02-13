@@ -14,7 +14,7 @@ def createHeader(zone):
     retry = 600
     expire = 604800
     minimum = 3600
-    ttl = 3600
+    ttl = 5
     name = zone
     origin = f"$ORIGIN {zone}."
     ttl_full = f"$TTL {ttl}"
@@ -42,12 +42,18 @@ def ipconversion4to6(ipv4_address):
     ipv6 = "2002:"+ipv4[:4]+":"+ipv4[4:]+"::"
     return ipv6
 
+def ipv4embeddedipv6(ipv4_address):
+    hex_number = ["{:02x}".format(_) for _ in ipv4_address]
+    ipv4 = "".join(hex_number)
+    ipv6 = "2001:db8::"+ ".".join(str(_) for _ in ipv4_address)
+    return ipv6
+
 def incrementIP(ip):
     for i in range(3, -1, -1):
         if ip[i] < 255:
             ip[i] += 1
             break
-        elif i == 2:
+        elif i == 0:
             raise ValueError("IP address out of range")
         else:
             ip[i] = 0
@@ -58,7 +64,7 @@ def writeRecords(f, startIP, amount):
     ip = list(map(int,startIP.split("."))) # [192, 168, 1, 1]
     i = 0
     while i < amount:
-        f.write(f"{'.'.join(str(x) for x in ip)}\tIN\tAAAA\t{ipconversion4to6(ip)}\n")
+        f.write(f"{'-'.join(str(x).zfill(3) for x in ip)}\tIN\tAAAA\t{ipv4embeddedipv6(ip)}\n")
         incrementIP(ip)
         i += 1
     
