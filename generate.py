@@ -59,12 +59,15 @@ def incrementIP(ip):
             ip[i] = 0
 
 
-def writeRecords(f, startIP, amount):
+def writeRecords(f, startIP, amount, mode):
     # Parse the startIP
     ip = list(map(int,startIP.split("."))) # [192, 168, 1, 1]
     i = 0
     while i < amount:
-        f.write(f"{'-'.join(str(x).zfill(3) for x in ip)}\tIN\tAAAA\t{ipv4embeddedipv6(ip)}\n")
+        if mode == 0:
+            f.write(f"{'-'.join(str(x).zfill(3) for x in ip)}\tIN\tAAAA\t{ipv4embeddedipv6(ip)}\n")
+        else:
+            f.write(f"{ip[0]},{ip[1]},{ip[2]},{ip[3]}\tIN\tAAAA\t{ipconversion4to6(ip)}\n")
         incrementIP(ip)
         i += 1
     
@@ -82,6 +85,7 @@ def main():
     parser.add_argument('-o', '--ofile', help='Output file name', required=True)
     parser.add_argument('-sr', '--startrange', help='Start IP range, inclusive', required=True)
     parser.add_argument('-a', '--amount', help='Amount of records to generate', required=True)
+    parser.add_argument('-m', '--mode', help='Mode of generation, default is 0', required=False, default=0)
 
     args = parser.parse_args()
 
@@ -89,7 +93,7 @@ def main():
     f = open(args.ofile, "w")
     if args.zone is not None:
         f.write(createHeader(args.zone))
-    writeRecords(f, args.startrange, int(args.amount))
+    writeRecords(f, args.startrange, int(args.amount), int(args.mode))
     f.close()
     after = time.process_time()
     total = after - before
